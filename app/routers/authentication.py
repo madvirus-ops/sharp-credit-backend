@@ -87,7 +87,7 @@ async def login_with__password(
     db: Session = Depends(get_db),
 ):
     result = login_with_password(
-        body.email,
+        body.username,
         body.password,
         db,
     )

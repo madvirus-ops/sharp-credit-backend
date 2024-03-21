@@ -142,6 +142,7 @@ def verify_signup_email(email: str, code: str, db: Session):
         else:
             user.email_verified = True
             user.updated_at = datetime.now(tz)
+            db.delete(ver_code)
             db.commit()
             return {
                 "success": True,
@@ -191,6 +192,7 @@ def verify_signup_phone_number(phone_number: str, code: str, db: Session):
         else:
             user.phone_number_verified = True
             user.updated_at = datetime.now(tz)
+            db.delete(ver_code)
             db.commit()
             return {
                 "success": True,
@@ -222,16 +224,16 @@ def login_with_password(
 
         else:
             user = login['user']
-            access_token = create_access_token({"id": user['user_id'], "email": user['email']})
-            refresh_token = create_refresh_token({"id": user['user_id'], "email": user['email']})
+            access_token = create_access_token({"id": user.user_id, "email": user.email})
+            refresh_token = create_refresh_token({"id": user.user_id, "email": user.email})
             if refresh_token["code"] == 200 and access_token["code"] == 200:
                 return {
                     "message": "Logged in successfully",
                     "code": 200,
-                    "status": "success",
+                    "success": True,
                     "data": {
-                        "access_token": access_token["token"],
-                        "expires": access_token["expires"],
+                        "access": access_token,
+                        "refresh": refresh_token,
                     },
                 }
             return r.error_occured

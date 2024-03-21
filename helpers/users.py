@@ -85,9 +85,9 @@ class UserHelper(object):
 
             if not user or user.account_deleted:
                 return {"code": 404, "message": "user not found"}
-            if not user or user.email_verified:
+            if not user or not user.email_verified:
                 return {"code": 413, "message": "user not found"}
-            if not user or user.phonenumber_verified:
+            if not user or not user.phone_number_verified:
                 return {"code": 414, "message": "user not found"}
 
             if self.verify_pin(password, user.password):

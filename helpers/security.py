@@ -24,10 +24,13 @@ LOGGER = logging.getLogger(__name__)
 # AUTHENTICATION
 ITS_DANGEROUS_TOKEN_KEY = os.getenv("ITS_DANGEROUS_TOKEN_KEY")
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+REFRESH_SECRET_KEY = os.getenv("REFRESH_SECRET_KEY")
+
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 60 * 7
-REFRESH_SECRET_KEY = os.getenv("REFRESH_SECRET_KEY")
 REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 60 * 7 * 3
+
 token_signer = URLSafeTimedSerializer(secret_key=ITS_DANGEROUS_TOKEN_KEY)
 
 
@@ -50,10 +53,10 @@ def create_access_token(data: dict):
     """
     Create A JWT
     """
-    expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES) + datetime.utcnow()
+    expire = timedelta(seconds=ACCESS_TOKEN_EXPIRE_MINUTES) + datetime.utcnow()
     data.update({"exp": expire})
     token = jwt.encode(claims=data, key=SECRET_KEY, algorithm=ALGORITHM)
-    return {"code": 200, "token": token, "expires": expire}
+    return {"code": 200, "token": token, "expires": ACCESS_TOKEN_EXPIRE_MINUTES}
 
 
 def create_refresh_token(data: dict):
@@ -61,10 +64,10 @@ def create_refresh_token(data: dict):
     Create A Long Lived JWT
 
     """
-    expire = timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES) + datetime.utcnow()
+    expire = timedelta(seconds=REFRESH_TOKEN_EXPIRE_MINUTES) + datetime.utcnow()
     data.update({"exp": expire})
     token = jwt.encode(claims=data, key=REFRESH_SECRET_KEY, algorithm=ALGORITHM)
-    return {"code": 200, "token": token, "expires": expire}
+    return {"code": 200, "token": token, "expires": REFRESH_TOKEN_EXPIRE_MINUTES}
 
 
 def verify_access_token(token: str):
