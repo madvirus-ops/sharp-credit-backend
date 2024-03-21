@@ -28,8 +28,8 @@ REFRESH_SECRET_KEY = os.getenv("REFRESH_SECRET_KEY")
 
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 60 * 7
-REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 60 * 7 * 3
+ACCESS_TOKEN_EXPIRE_SECONDS = 60 * 30
+REFRESH_TOKEN_EXPIRE_SECONDS= 60 * 60 * 24 * 7
 
 token_signer = URLSafeTimedSerializer(secret_key=ITS_DANGEROUS_TOKEN_KEY)
 
@@ -53,10 +53,10 @@ def create_access_token(data: dict):
     """
     Create A JWT
     """
-    expire = timedelta(seconds=ACCESS_TOKEN_EXPIRE_MINUTES) + datetime.utcnow()
+    expire = timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS) + datetime.utcnow()
     data.update({"exp": expire})
     token = jwt.encode(claims=data, key=SECRET_KEY, algorithm=ALGORITHM)
-    return {"code": 200, "token": token, "expires": ACCESS_TOKEN_EXPIRE_MINUTES}
+    return {"code": 200, "token": token, "expires": ACCESS_TOKEN_EXPIRE_SECONDS}
 
 
 def create_refresh_token(data: dict):
@@ -64,10 +64,10 @@ def create_refresh_token(data: dict):
     Create A Long Lived JWT
 
     """
-    expire = timedelta(seconds=REFRESH_TOKEN_EXPIRE_MINUTES) + datetime.utcnow()
+    expire = timedelta(seconds=REFRESH_TOKEN_EXPIRE_SECONDS) + datetime.utcnow()
     data.update({"exp": expire})
     token = jwt.encode(claims=data, key=REFRESH_SECRET_KEY, algorithm=ALGORITHM)
-    return {"code": 200, "token": token, "expires": REFRESH_TOKEN_EXPIRE_MINUTES}
+    return {"code": 200, "token": token, "expires": REFRESH_TOKEN_EXPIRE_SECONDS}
 
 
 def verify_access_token(token: str):
@@ -81,11 +81,13 @@ def verify_access_token(token: str):
 
         id: str = payload.get("id")
         exp = payload.get("exp")
+        print(datetime.fromtimestamp(exp))
         if id is None:
             LOGGER.error(f"Decrypted JWT has no id in payload. {payload}")
             # raise the HTTP Exception
             return {"code": 400}
-        if datetime.now().replace(tzinfo=pytz.UTC) > exp.replace(tzinfo=pytz.UTC):
+        
+        if datetime.now().replace(tzinfo=pytz.UTC) > datetime.fromtimestamp(exp).replace(tzinfo=pytz.UTC):
             return {"code": 402}
 
         token_uid = {"id": id, "code": 200}
@@ -105,10 +107,11 @@ def verify_refresh_token(token: str):
         payload = jwt.decode(token=token, key=REFRESH_SECRET_KEY, algorithms=ALGORITHM)
         id: str = payload.get("id")
         exp = payload.get("exp")
+        print(datetime.fromtimestamp(exp))
         if id is None:
             return {"code": 400}
 
-        if datetime.now().replace(tzinfo=pytz.UTC) > exp.replace(tzinfo=pytz.UTC):
+        if datetime.now().replace(tzinfo=pytz.UTC) > datetime.fromtimestamp(exp).replace(tzinfo=pytz.UTC):
             return {"code": 402}
 
         token_id = id

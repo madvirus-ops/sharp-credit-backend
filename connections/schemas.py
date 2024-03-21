@@ -43,3 +43,7 @@ class Setusername(BaseModel):
 class ChangePassword(BaseModel):
     old_password: str
     new_password: str
+
+
+class TokenBody(BaseModel):
+    token:str

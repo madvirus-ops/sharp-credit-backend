@@ -11,7 +11,7 @@ from sqlalchemy import desc, or_, asc, func
 from response import responses as r
 import pytz
 from helpers.validations import validate_email, validate_phone_number
-from helpers.security import create_access_token,create_refresh_token
+from helpers.security import create_access_token,create_refresh_token,verify_refresh_token
 import uuid
 
 
@@ -309,3 +309,50 @@ def verify_password_reset(email: str, new_password: str, code: str, db: Session)
     except Exception as e:
         print(e.args)
         return r.error_occured
+
+
+def verify_refresh_access_token(
+    token:str,
+    db:Session,
+):
+    try:
+        result = verify_refresh_token(token)
+
+        if result["code"] != 200:
+            return {
+                "code": 401,
+                "status": "error",
+                "message": "Invalid authorization token or token Expired.",
+            }
+        
+        user = db.query(Users).filter(Users.user_id == result["id"]).first()
+
+        if user.account_deleted:
+            return {
+                "code": 401,
+                "status": "error",
+                "message": "User Not Found",
+            }
+
+        if user.is_restricted:
+            return {
+                "code": 401,
+                "status": "error",
+                "message": "Your account is suspended, please contact support",
+            }
+        
+        access_token = create_access_token({"id": user.user_id, "email": user.email})
+        refresh_token = create_refresh_token({"id": user.user_id, "email": user.email})
+        if refresh_token["code"] == 200 and access_token["code"] == 200:
+            return {
+                "message": "token refreshed successfully",
+                "code": 200,
+                "success": True,
+                "data": {
+                    "access": access_token,
+                    "refresh": refresh_token,
+                },
+            }
+        return r.error_occured
+    except Exception as e:
+        print(e.args)

@@ -8,7 +8,7 @@ from connections.database import get_db
 
 from sqlalchemy.orm import Session
 from datetime import datetime
-from app.routers import authentication
+from app.routers import authentication,user_services
 
 # print(datetime.now())
 
@@ -39,6 +39,8 @@ app = FastAPI(
 
 def include_all_router(app: FastAPI):
     app.include_router(authentication.router)
+    app.include_router(user_services.router)
+
 
 
 

@@ -12,6 +12,7 @@ from connections.schemas import (
     EmailVerify,
     USerEmail,
     ResetPassword,
+    TokenBody
 
 )
 from app.controllers.authentication import *
@@ -92,7 +93,24 @@ async def login_with__password(
         db,
     )
     response.status_code = result["code"]
+    return result
 
+
+@router.post("/login/refresh")
+async def refresh____access_token(
+    body: TokenBody,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    """
+        `token` : This is the refresh token gotten from the login endpoint
+    
+    """
+    result = verify_refresh_access_token(
+        body.token,
+        db,
+    )
+    response.status_code = result["code"]
     return result
 
 
