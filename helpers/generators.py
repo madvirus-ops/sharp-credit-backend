@@ -1,8 +1,9 @@
 import sys
 
 sys.path.append("./")
-from datetime import datetime
 import secrets
+from datetime import datetime
+
 from connections.database import TZ as tz
 
 

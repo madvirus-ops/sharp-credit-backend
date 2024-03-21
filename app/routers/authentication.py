@@ -1,22 +1,22 @@
 import sys
+
 sys.path.append("./")
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Response, Request, Header
 import re
+
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request, Response
+
+from app.controllers.authentication import *
 from connections.database import get_db
 from connections.schemas import (
+    EmailVerify,
     LoginEmail,
-    Signup,
-    EmailVerify,
     PhoneVerify,
-    EmailVerify,
-    USerEmail,
     ResetPassword,
-    TokenBody
-
+    Signup,
+    TokenBody,
+    USerEmail,
 )
-from app.controllers.authentication import *
-
 
 router = APIRouter(prefix="/api/v2/auth", tags=["Authentication"])
 
@@ -101,8 +101,8 @@ async def refresh____access_token(
     db: Session = Depends(get_db),
 ):
     """
-        `token` : This is the refresh token gotten from the login endpoint
-    
+    `token` : This is the refresh token gotten from the login endpoint
+
     """
     result = verify_refresh_access_token(
         body.token,
@@ -122,7 +122,6 @@ async def send_reset_otp(
     result = send_pin_reset_code(body.phone_number, db)
     response.status_code = result["code"]
     return result
-
 
 
 @router.post("/reset/password")

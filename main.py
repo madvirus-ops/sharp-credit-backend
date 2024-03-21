@@ -1,14 +1,13 @@
-from fastapi import FastAPI
-
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware import Middleware
-from fastapi.staticfiles import StaticFiles
-
-from connections.database import get_db
-
-from sqlalchemy.orm import Session
 from datetime import datetime
-from app.routers import authentication,user_services
+
+from fastapi import FastAPI
+from fastapi.middleware import Middleware
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
+
+from app.routers import authentication, user_services
+from connections.database import get_db
 
 # print(datetime.now())
 
@@ -35,14 +34,9 @@ app = FastAPI(
 )
 
 
-
-
 def include_all_router(app: FastAPI):
     app.include_router(authentication.router)
     app.include_router(user_services.router)
 
 
-
-
 include_all_router(app=app)
-

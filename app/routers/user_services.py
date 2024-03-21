@@ -1,14 +1,14 @@
 import sys
-sys.path.append("./")
-from fastapi import APIRouter, BackgroundTasks, Depends, Response, Request, Header
-import re
-from connections.database import get_db
-from connections.schemas import (
-    ChangePassword,
-)
-from app.controllers.user_services import *
-from helpers.security import api_key_header
 
+sys.path.append("./")
+import re
+
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request, Response
+
+from app.controllers.user_services import *
+from connections.database import get_db
+from connections.schemas import ChangePassword
+from helpers.security import api_key_header
 
 router = APIRouter(prefix="/api/v2/user", tags=["User Section"])
 

@@ -2,16 +2,15 @@ import sys
 
 sys.path.append("./")
 
-from connections.models import (
-    Users,
-    VerificationCodes,
-)
+from datetime import date, datetime, timedelta
+
 import pytz
-from helpers.users import UserHelper
+from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
+
+from connections.models import Users, VerificationCodes
+from helpers.users import UserHelper
 from response import responses as r
-from sqlalchemy import or_, desc
-from datetime import datetime, timedelta, date
 
 
 def get_user_details(user_id: str, db: Session):
@@ -42,4 +41,3 @@ def change_password(user_id: str, old_password: str, new_password: str, db: Sess
     except Exception as e:
         print(e.args)
         return r.error_occured
-    

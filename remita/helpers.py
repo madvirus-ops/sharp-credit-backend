@@ -2,13 +2,14 @@ import sys
 
 sys.path.append("./")
 
-from connections.models import RemitaRequests, get_env
-from helpers.generators import GenerateTransactionID
-import requests
-from response import responses as r
 import json
+
+import requests
 from sqlalchemy.orm import Session
 
+from connections.models import RemitaRequests, get_env
+from helpers.generators import GenerateTransactionID
+from response import responses as r
 
 BASE_URL = get_env("REMITA_BASE_URL")
 API_KEY = get_env("REMITA_API_KEY")

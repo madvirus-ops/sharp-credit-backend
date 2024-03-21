@@ -1,23 +1,26 @@
 import sys
 
 sys.path.append("./")
-from itsdangerous import URLSafeTimedSerializer, BadTimeSignature, BadSignature
 import logging
 import os
-from dotenv import load_dotenv
-from connections.models import Users
-from connections.database import get_db
-from sqlalchemy.orm import Session
-from fastapi import Request, HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
 import pytz
+from dotenv import load_dotenv
+from fastapi import Depends, HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from itsdangerous import BadSignature, BadTimeSignature, URLSafeTimedSerializer
+from sqlalchemy.orm import Session
+
+from connections.database import get_db
+from connections.models import Users
 
 load_dotenv()
-from response import responses as r
-from jose import ExpiredSignatureError, jwt, JWTError
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
+from jose import ExpiredSignatureError, JWTError, jwt
+
+from response import responses as r
 
 LOGGER = logging.getLogger(__name__)
 
@@ -29,7 +32,7 @@ REFRESH_SECRET_KEY = os.getenv("REFRESH_SECRET_KEY")
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_SECONDS = 60 * 30
-REFRESH_TOKEN_EXPIRE_SECONDS= 60 * 60 * 24 * 7
+REFRESH_TOKEN_EXPIRE_SECONDS = 60 * 60 * 24 * 7
 
 token_signer = URLSafeTimedSerializer(secret_key=ITS_DANGEROUS_TOKEN_KEY)
 
@@ -86,8 +89,10 @@ def verify_access_token(token: str):
             LOGGER.error(f"Decrypted JWT has no id in payload. {payload}")
             # raise the HTTP Exception
             return {"code": 400}
-        
-        if datetime.now().replace(tzinfo=pytz.UTC) > datetime.fromtimestamp(exp).replace(tzinfo=pytz.UTC):
+
+        if datetime.now().replace(tzinfo=pytz.UTC) > datetime.fromtimestamp(
+            exp
+        ).replace(tzinfo=pytz.UTC):
             return {"code": 402}
 
         token_uid = {"id": id, "code": 200}
@@ -111,7 +116,9 @@ def verify_refresh_token(token: str):
         if id is None:
             return {"code": 400}
 
-        if datetime.now().replace(tzinfo=pytz.UTC) > datetime.fromtimestamp(exp).replace(tzinfo=pytz.UTC):
+        if datetime.now().replace(tzinfo=pytz.UTC) > datetime.fromtimestamp(
+            exp
+        ).replace(tzinfo=pytz.UTC):
             return {"code": 402}
 
         token_id = id

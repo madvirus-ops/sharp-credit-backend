@@ -1,24 +1,27 @@
 import sys
+
 sys.path.append("./")
 
+from datetime import datetime
+
 from sqlalchemy import (
-    Column,
-    DateTime,
-    Time,
     Boolean,
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
     Integer,
+    Numeric,
     String,
     Text,
-    Numeric,
-    ForeignKey,
-    Date,
+    Time,
     asc,
     desc,
     func,
 )
-from datetime import datetime
 from sqlalchemy.orm import relationship
-from .database import AbstractModel, TZ, get_env
+
+from .database import TZ, AbstractModel, get_env
 
 tz = TZ
 
@@ -30,21 +33,21 @@ class Users(AbstractModel):
     first_name = Column(String(255), default="")
     last_name = Column(String(255), default="")
     username = Column(String(255), default="")
-    
+
     email = Column(String(255), nullable=True)
     phone_number = Column(String(255), default="")
 
-    email_verified = Column(Boolean,default=False)
-    phone_number_verified = Column(Boolean,default=False)
+    email_verified = Column(Boolean, default=False)
+    phone_number_verified = Column(Boolean, default=False)
 
     password = Column(String(255), default="")
-    pin  = Column(String(255),default="False")
+    pin = Column(String(255), default="False")
 
     date_of_birth = Column(Date, default=datetime.now(tz).date())
     profile_picture = Column(String(255), default="")
 
-    is_restricted = Column(Boolean,default=False)
-    account_deleted = Column(Boolean,default=False)
+    is_restricted = Column(Boolean, default=False)
+    account_deleted = Column(Boolean, default=False)
 
     verification_codes = relationship(
         "VerificationCodes",
@@ -61,7 +64,6 @@ class Users(AbstractModel):
         primaryjoin="Users.user_id==RemitaRequests.user_id",
         foreign_keys="[RemitaRequests.user_id]",
     )
-
 
 
 class VerificationCodes(AbstractModel):
@@ -87,11 +89,11 @@ class RemitaRequests(AbstractModel):
     )
 
     customer_id = Column(String(255), default="")
-    response_body = Column(Text,default="")
-    salary_history = Column(Text,default="")
-    loan_history = Column(Text,default="")
+    response_body = Column(Text, default="")
+    salary_history = Column(Text, default="")
+    loan_history = Column(Text, default="")
 
-    salary_count = Column(Integer,default=0)
+    salary_count = Column(Integer, default=0)
 
     user = relationship(
         "Users", back_populates="remita_request", foreign_keys=[user_id]

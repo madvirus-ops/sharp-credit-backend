@@ -1,10 +1,12 @@
 import sys
 
 sys.path.append("./")
-from sqlalchemy.orm import Session
-from response import responses as r
-from connections.models import Users
 import re
+
+from sqlalchemy.orm import Session
+
+from connections.models import Users
+from response import responses as r
 
 
 def validate_phone_number(phone_number: str, db: Session):

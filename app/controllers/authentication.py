@@ -2,23 +2,25 @@ import sys
 
 sys.path.append("./")
 
-from helpers.users import UserHelper
-from connections.models import Users, VerificationCodes, tz, RemitaRequests
-from datetime import datetime, timedelta
+import json
 import random
-from sqlalchemy.orm import Session
-from sqlalchemy import desc, or_, asc, func
-from response import responses as r
+import uuid
+from datetime import datetime, timedelta
+
 import pytz
-from helpers.validations import validate_email, validate_phone_number
+from sqlalchemy import asc, desc, func, or_
+from sqlalchemy.orm import Session
+
+from connections.models import RemitaRequests, Users, VerificationCodes, tz
 from helpers.security import (
     create_access_token,
     create_refresh_token,
     verify_refresh_token,
 )
+from helpers.users import UserHelper
+from helpers.validations import validate_email, validate_phone_number
 from remita.helpers import getCustomerByPhonenumber
-import uuid
-import json
+from response import responses as r
 
 
 def create_user_account(
@@ -38,7 +40,7 @@ def create_user_account(
 
         if user:
             return r.user_exist_phone
-        
+
         request = (
             db.query(RemitaRequests)
             .filter(RemitaRequests.user_id == user.user_id)
@@ -87,13 +89,10 @@ def create_user_account(
                 "data": {"user_id": help["user_id"]},
             }
         return help
-    
+
     except Exception as e:
         print(e.args)
         return r.error_occured
-
-
-
 
 
 def resend_signup_email_verification(email: str, db: Session):

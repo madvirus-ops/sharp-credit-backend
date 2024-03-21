@@ -1,20 +1,16 @@
 import sys
 
 sys.path.append("./")
-from sqlalchemy import (
-    Column,
-    DateTime,
-    String,
-)
-import uuid
-import pytz
-from datetime import datetime
 import logging
-from sqlalchemy import create_engine
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import sessionmaker, declarative_base
-from dotenv import load_dotenv
 import os
+import uuid
+from datetime import datetime
+
+import pytz
+from dotenv import load_dotenv
+from sqlalchemy import Column, DateTime, String, create_engine
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv()
 
@@ -55,9 +51,7 @@ def get_env(value: str):
     return os.getenv(value)
 
 
-
 class AbstractModel(Base):
-
     """abstract model"""
 
     __abstract__ = True

@@ -80,7 +80,6 @@ invalid_pin = {
 }
 
 
-
 password_not_match = {
     "success": False,
     "code": 400,

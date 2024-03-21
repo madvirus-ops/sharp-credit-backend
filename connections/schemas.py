@@ -1,6 +1,7 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
 from datetime import date, datetime
+from typing import Optional
+
+from pydantic import BaseModel, EmailStr
 
 
 class Signup(BaseModel):
@@ -44,4 +45,4 @@ class ChangePassword(BaseModel):
 
 
 class TokenBody(BaseModel):
-    token:str
+    token: str

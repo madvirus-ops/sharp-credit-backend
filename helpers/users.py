@@ -1,22 +1,20 @@
-from datetime import datetime
 import sys
+from datetime import datetime
+
 import pytz
-
-
 from sqlalchemy import desc, or_
 
 sys.path.append("./")
-import uuid
+import decimal
 import random
 import secrets
-from passlib.context import CryptContext
-from connections.models import (
-    Users,
-)
-import decimal
-from sqlalchemy.orm import Session
-import response.responses as r
+import uuid
 
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+
+import response.responses as r
+from connections.models import Users
 
 pwd_hash = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -51,7 +49,11 @@ class UserHelper(object):
             )
 
             if user is not None:
-                return {"code": 400, "success": False, "message": "account already exists"}
+                return {
+                    "code": 400,
+                    "success": False,
+                    "message": "account already exists",
+                }
 
             user = Users(
                 first_name=first_name.strip(),
@@ -59,7 +61,7 @@ class UserHelper(object):
                 email=email.strip(),
                 user_id=self.user_id,
                 phone_number=phone_number.strip(),
-                password=self.hash_pin(password)
+                password=self.hash_pin(password),
             )
             self.db.add(user)
             self.db.commit()
@@ -187,7 +189,6 @@ class UserHelper(object):
         except Exception as e:
             return False
 
-
     def setUserPassword(self, password: str):
         try:
             user = self.get_user_by_id()
@@ -207,7 +208,6 @@ class UserHelper(object):
             return {"code": 404}
         except Exception as e:
             return {"code": 400}
-
 
     def changePin(self, old_pin, new_pin):
         try:
