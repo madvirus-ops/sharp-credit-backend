@@ -4,8 +4,6 @@ from datetime import date, datetime
 
 
 class Signup(BaseModel):
-    first_name: str
-    last_name: str
     email: str
     password: str
     phone_number: str

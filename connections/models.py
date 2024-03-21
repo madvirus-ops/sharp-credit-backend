@@ -54,6 +54,14 @@ class Users(AbstractModel):
         foreign_keys="[VerificationCodes.user_id]",
     )
 
+    remita_request = relationship(
+        "RemitaRequests",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        primaryjoin="Users.user_id==RemitaRequests.user_id",
+        foreign_keys="[RemitaRequests.user_id]",
+    )
+
 
 
 class VerificationCodes(AbstractModel):
@@ -66,4 +74,25 @@ class VerificationCodes(AbstractModel):
     expires = Column(DateTime, nullable=False)
     user = relationship(
         "Users", back_populates="verification_codes", foreign_keys=[user_id]
+    )
+
+
+class RemitaRequests(AbstractModel):
+    __tablename__ = "remita_requests"
+
+    response_id = Column(String(255), default="")
+
+    user_id = Column(
+        String(255), ForeignKey("users.user_id", ondelete="CASCADE"), nullable=True
+    )
+
+    customer_id = Column(String(255), default="")
+    response_body = Column(Text,default="")
+    salary_history = Column(Text,default="")
+    loan_history = Column(Text,default="")
+
+    salary_count = Column(Integer,default=0)
+
+    user = relationship(
+        "Users", back_populates="remita_request", foreign_keys=[user_id]
     )

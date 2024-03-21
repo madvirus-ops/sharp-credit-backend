@@ -29,8 +29,6 @@ async def Sign_up(
     db: Session = Depends(get_db),
 ):
     result = create_user_account(
-        body.first_name,
-        body.last_name,
         body.phone_number,
         body.email,
         body.password,

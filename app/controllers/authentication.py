@@ -3,7 +3,7 @@ import sys
 sys.path.append("./")
 
 from helpers.users import UserHelper
-from connections.models import Users, VerificationCodes, tz
+from connections.models import Users, VerificationCodes, tz, RemitaRequests
 from datetime import datetime, timedelta
 import random
 from sqlalchemy.orm import Session
@@ -11,42 +11,75 @@ from sqlalchemy import desc, or_, asc, func
 from response import responses as r
 import pytz
 from helpers.validations import validate_email, validate_phone_number
-from helpers.security import create_access_token,create_refresh_token,verify_refresh_token
+from helpers.security import (
+    create_access_token,
+    create_refresh_token,
+    verify_refresh_token,
+)
+from remita.helpers import getCustomerByPhonenumber
 import uuid
+import json
 
 
 def create_user_account(
-    first_name: str,
-    last_name: str,
     phone_number: str,
     email: str,
     password: str,
     db: Session,
 ):
     try:
-        if len(first_name) < 3 or len(last_name) < 3:
-            return r.invalid_name
-
-        val_phon = validate_phone_number(phone_number, db)
-        val_email = validate_email(email, db)
-
-        if val_phon["code"] == 400 or val_email["code"] == 400:
-            return val_phon
-
-        if val_phon["code"] == 201 or val_email["code"] == 201:
-            ress = resend_signup_phone_vefification(phone_number, db)
-            ress2 = resend_signup_email_verification(email, db)
-            return ress
 
         user_id = uuid.uuid4().hex
-        phone_number = val_phon["phone_number"]
+
+        if phone_number.startswith("234"):
+            phone_number = "0" + phone_number[3:]
+
+        user = db.query(Users).filter(Users.phone_number == phone_number).first()
+
+        if user:
+            return r.user_exist_phone
+        
+        request = (
+            db.query(RemitaRequests)
+            .filter(RemitaRequests.user_id == user.user_id)
+            .order_by(desc(RemitaRequests.created_at))
+            .first()
+        )
+
+        if request:
+            data = json.loads(request.response_body)
+            customer_name = data["customerName"].split(" ")
+            first_name = customer_name[0]
+            last_name = customer_name[-1]
+            bvn = data["bvn"]
+        else:
+            request = getCustomerByPhonenumber(phone_number, db)
+            if request["code"] != 200:
+                return r.error_occured
+
+            first_name = request["first_name"]
+            last_name = request["last_name"]
+            bvn = request["bvn"]
+            response_id = request["response_id"]
+
+            update_request = (
+                db.query(RemitaRequests)
+                .filter(RemitaRequests.response_id == response_id)
+                .first()
+            )
 
         help = UserHelper(db, user_id).createUser(
             first_name, last_name, phone_number, email, password
         )
         if help["code"] == 200:
+            user = db.query(Users).filter(Users.user_id == user_id).first()
+            user.bvn = bvn
+            update_request.user_id = user_id
+            db.commit()
+
             resend_signup_email_verification(email, db)
             resend_signup_phone_vefification(phone_number, db)
+
             return {
                 "success": True,
                 "code": 201,
@@ -54,9 +87,13 @@ def create_user_account(
                 "data": {"user_id": help["user_id"]},
             }
         return help
+    
     except Exception as e:
         print(e.args)
         return r.error_occured
+
+
+
 
 
 def resend_signup_email_verification(email: str, db: Session):
@@ -223,9 +260,13 @@ def login_with_password(
             return r.phone_notverified
 
         else:
-            user = login['user']
-            access_token = create_access_token({"id": user.user_id, "email": user.email})
-            refresh_token = create_refresh_token({"id": user.user_id, "email": user.email})
+            user = login["user"]
+            access_token = create_access_token(
+                {"id": user.user_id, "email": user.email}
+            )
+            refresh_token = create_refresh_token(
+                {"id": user.user_id, "email": user.email}
+            )
             if refresh_token["code"] == 200 and access_token["code"] == 200:
                 return {
                     "message": "Logged in successfully",
@@ -240,7 +281,6 @@ def login_with_password(
     except Exception as e:
         print(e.args)
         return r.error_occured
-
 
 
 def send_pin_reset_code(email: str, db: Session):
@@ -312,8 +352,8 @@ def verify_password_reset(email: str, new_password: str, code: str, db: Session)
 
 
 def verify_refresh_access_token(
-    token:str,
-    db:Session,
+    token: str,
+    db: Session,
 ):
     try:
         result = verify_refresh_token(token)
@@ -324,7 +364,7 @@ def verify_refresh_access_token(
                 "status": "error",
                 "message": "Invalid authorization token or token Expired.",
             }
-        
+
         user = db.query(Users).filter(Users.user_id == result["id"]).first()
 
         if user.account_deleted:
@@ -340,7 +380,7 @@ def verify_refresh_access_token(
                 "status": "error",
                 "message": "Your account is suspended, please contact support",
             }
-        
+
         access_token = create_access_token({"id": user.user_id, "email": user.email})
         refresh_token = create_refresh_token({"id": user.user_id, "email": user.email})
         if refresh_token["code"] == 200 and access_token["code"] == 200:
