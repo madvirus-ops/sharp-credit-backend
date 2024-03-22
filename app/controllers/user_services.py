@@ -8,7 +8,7 @@ import pytz
 from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
 
-from connections.models import Users, VerificationCodes,RemitaRequests
+from connections.models import Users, VerificationCodes, RemitaRequests
 from remita.helpers import getCustomerByAccount
 from helpers.users import UserHelper
 from response import responses as r
@@ -46,12 +46,15 @@ def change_password(user_id: str, old_password: str, new_password: str, db: Sess
 
 
 def get_customer_loan_from_account(
-    user_id:str,bank_code:str,account_number:str,db:Session
+    user_id: str, bank_code: str, account_number: str, db: Session
 ):
     try:
         request = (
             db.query(RemitaRequests)
-            .filter(RemitaRequests.user_id == user_id,RemitaRequests.request_type == "phone_number")
+            .filter(
+                RemitaRequests.user_id == user_id,
+                RemitaRequests.request_type == "phone_number",
+            )
             .order_by(desc(RemitaRequests.created_at))
             .first()
         )
@@ -65,7 +68,7 @@ def get_customer_loan_from_account(
             salary_history = json.loads(request.salary_history)
             salary_count = request.salary_count
         else:
-            request = getCustomerByAccount(bank_code,account_number, db)
+            request = getCustomerByAccount(bank_code, account_number, db)
             if request["code"] != 200:
                 return r.error_occured
 
@@ -73,10 +76,9 @@ def get_customer_loan_from_account(
             last_name = request["last_name"]
             bvn = request["bvn"]
             response_id = request["response_id"]
-            salary_count = request['salary_count']
-            loan_history = request['load_history']
-            salary_history = request['salary_history']
-
+            salary_count = request["salary_count"]
+            loan_history = request["load_history"]
+            salary_history = request["salary_history"]
 
             update_request = (
                 db.query(RemitaRequests)
@@ -84,10 +86,10 @@ def get_customer_loan_from_account(
                 .first()
             )
 
-        #TODO implementing the loan the user can get from their salary 
-            
+        # TODO implementing the loan the user can get from their salary
+
         pass
-        
+
     except Exception as e:
         print(e.args)
         return r.error_occured

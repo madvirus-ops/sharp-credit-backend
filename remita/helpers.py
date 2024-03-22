@@ -41,7 +41,6 @@ def generate_remita_auth_variables():
     return requestId, authorisationCode, apiHash, authorization
 
 
-
 def getCustomerByPhonenumber(phone_number: str, db: Session):
     try:
         url = f"{BASE_URL}/payday/salary/history/ph"
@@ -174,9 +173,9 @@ def getCustomerByAccount(bank_code: str, account_number: str, db: Session):
                 "last_name": last_name,
                 "bvn": bvn,
                 "response_id": response_id,
-                "salary_count":salary_count,
-                "salary_history":salary_history,
-                "loan_history":loan_history
+                "salary_count": salary_count,
+                "salary_history": salary_history,
+                "loan_history": loan_history,
             }
         return r.error_occured
 
