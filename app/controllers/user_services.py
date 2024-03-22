@@ -9,6 +9,7 @@ from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
 
 from connections.models import Users, VerificationCodes
+from remita.helpers import getCustomerByAccount
 from helpers.users import UserHelper
 from response import responses as r
 
@@ -41,3 +42,8 @@ def change_password(user_id: str, old_password: str, new_password: str, db: Sess
     except Exception as e:
         print(e.args)
         return r.error_occured
+
+
+def get_customer_loan_from_account(
+    
+)

@@ -5,10 +5,14 @@ from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+from dotenv import load_dotenv
+
 
 from app.routers import authentication, user_services
 from connections.database import get_db
 
+
+load_dotenv(".env")
 # print(datetime.now())
 
 middleware = [
