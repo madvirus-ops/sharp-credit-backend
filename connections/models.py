@@ -90,6 +90,7 @@ class RemitaRequests(AbstractModel):
 
     customer_id = Column(String(255), default="")
     response_body = Column(Text, default="")
+    request_type = Column(String(255),default="") #phone_number or account_number
     salary_history = Column(Text, default="")
     loan_history = Column(Text, default="")
 

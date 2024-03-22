@@ -43,7 +43,7 @@ def create_user_account(
 
         request = (
             db.query(RemitaRequests)
-            .filter(RemitaRequests.user_id == user.user_id)
+            .filter(RemitaRequests.user_id == user.user_id,RemitaRequests.request_type == "phone_number")
             .order_by(desc(RemitaRequests.created_at))
             .first()
         )
