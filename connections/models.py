@@ -87,7 +87,7 @@ class RemitaRequests(AbstractModel):
     user_id = Column(
         String(255), ForeignKey("users.user_id", ondelete="CASCADE"), nullable=True
     )
-
+    request_payload = Column(Text, default="")
     customer_id = Column(String(255), default="")
     response_body = Column(Text, default="")
     request_type = Column(String(255), default="")  # phone_number or account_number

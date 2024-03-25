@@ -57,14 +57,14 @@ def getCustomerByPhonenumber(phone_number: str, db: Session):
             "Authorization": authorization,
         }
 
-        payload = json.dumps(
+        payload = (
             {
                 "authorisationCode": authorisationCode,
                 "phoneNumber": phone_number,
                 "authorisationChannel": "USSD",
             }
         )
-        response = requests.post(url, data=payload, headers=headers)
+        response = requests.post(url, data=json.dumps(payload), headers=headers)
         response_data = response.json()
         if response_data["status"] == "success":
             data = response_data["data"]
@@ -92,6 +92,7 @@ def getCustomerByPhonenumber(phone_number: str, db: Session):
                     salary_count=salary_count,
                     request_type="phone_number",
                     response_id=response_id,
+                    request_payload=json.dumps(payload)
                 )
             )
             db.commit()
@@ -126,7 +127,7 @@ def getCustomerByAccount(bank_code: str, account_number: str, db: Session):
             "Authorization": authorization,
         }
 
-        payload = json.dumps(
+        payload = (
             {
                 "authorisationCode": authorisationCode,
                 "accountNumber": account_number,
@@ -134,7 +135,7 @@ def getCustomerByAccount(bank_code: str, account_number: str, db: Session):
                 "authorisationChannel": "USSD",
             }
         )
-        response = requests.post(url, data=payload, headers=headers)
+        response = requests.post(url, data=json.dumps(payload), headers=headers)
         response_data = response.json()
         print(response_data)
         if response_data["status"] == "success":
@@ -163,6 +164,7 @@ def getCustomerByAccount(bank_code: str, account_number: str, db: Session):
                     salary_count=salary_count,
                     response_id=response_id,
                     request_type="account_number",
+                    request_payload=json.dumps(payload)
                 )
             )
             db.commit()
