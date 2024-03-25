@@ -71,15 +71,14 @@ class UserHelper(object):
             print("error here \n\n")
             return r.error_occured
 
-    def login_user(self, email: str, password: str):
+    def login_user(self, phone_number: str, password: str):
         try:
             user = (
                 self.db.query(Users)
                 .filter(
                     or_(
-                        Users.phone_number == email,
-                        Users.username == email,
-                        Users.email == email,
+                        Users.phone_number == phone_number,
+                        Users.username == phone_number,
                     )
                 )
                 .first()
@@ -87,10 +86,10 @@ class UserHelper(object):
 
             if not user or user.account_deleted:
                 return {"code": 404, "message": "user not found"}
-            if not user or not user.email_verified:
-                return {"code": 413, "message": "user not found"}
+            # if not user or not user.email_verified:
+            #     return {"code": 413, "message": "user not found"}
             if not user or not user.phone_number_verified:
-                return {"code": 414, "message": "user not found"}
+                return {"code": 414, "message": "Account not verified"}
 
             if self.verify_pin(password, user.password):
                 user.last_login = datetime.now(tz)

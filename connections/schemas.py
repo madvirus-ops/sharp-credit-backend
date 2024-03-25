@@ -11,7 +11,7 @@ class Signup(BaseModel):
 
 
 class LoginEmail(BaseModel):
-    username: str
+    phone_number: str
     password: str
 
 

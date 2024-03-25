@@ -19,13 +19,14 @@ from helpers.security import (
 )
 from helpers.users import UserHelper
 from helpers.validations import validate_email, validate_phone_number
-from remita.helpers import getCustomerByPhonenumber
+from remita.helpers import getCustomerByPhonenumber,getCustomerByAccount
 from response import responses as r
 
 
 def create_user_account(
     phone_number: str,
-    email: str,
+    account_number: str,
+    bank_code:str,
     password: str,
     db: Session,
 ):
@@ -45,7 +46,7 @@ def create_user_account(
             db.query(RemitaRequests)
             .filter(
                 RemitaRequests.user_id == user.user_id,
-                RemitaRequests.request_type == "phone_number",
+                RemitaRequests.request_type == "account_number",
             )
             .order_by(desc(RemitaRequests.created_at))
             .first()
@@ -58,7 +59,7 @@ def create_user_account(
             last_name = customer_name[-1]
             bvn = data["bvn"]
         else:
-            request = getCustomerByPhonenumber(phone_number, db)
+            request = getCustomerByAccount(phone_number, db)
             if request["code"] != 200:
                 return r.error_occured
 
@@ -74,16 +75,17 @@ def create_user_account(
             )
 
         help = UserHelper(db, user_id).createUser(
-            first_name, last_name, phone_number, email, password
+            first_name, last_name, phone_number, "", password
         )
         if help["code"] == 200:
             user = db.query(Users).filter(Users.user_id == user_id).first()
             user.bvn = bvn
+            user.phone_number_verified = True
             update_request.user_id = user_id
             db.commit()
 
-            resend_signup_email_verification(email, db)
-            resend_signup_phone_vefification(phone_number, db)
+            # resend_signup_email_verification(email, db)
+            # resend_signup_phone_vefification(phone_number, db)
 
             return {
                 "success": True,
@@ -245,19 +247,19 @@ def verify_signup_phone_number(phone_number: str, code: str, db: Session):
 
 
 def login_with_password(
-    username: str,
+    phone_number: str,
     password: str,
     db: Session,
 ):
     try:
 
-        login = UserHelper(db).login_user(username.lower(), password)
+        login = UserHelper(db).login_user(phone_number.lower(), password)
         if login["code"] == 404:
             return r.user_notfound
         elif login["code"] == 400:
             return r.invalid_login
-        elif login["code"] == 413:
-            return r.email_notverified
+        # elif login["code"] == 413:
+        #     return r.email_notverified
         elif login["code"] == 414:
             return r.phone_notverified
 
