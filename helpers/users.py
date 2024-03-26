@@ -45,7 +45,9 @@ class UserHelper(object):
     ):
         try:
             user = (
-                self.db.query(Borrower).filter(Borrower.phone_number == phone_number).first()
+                self.db.query(Borrower)
+                .filter(Borrower.phone_number == phone_number)
+                .first()
             )
 
             if user is not None:
@@ -105,7 +107,11 @@ class UserHelper(object):
 
     def get_user_by_id(self):
         try:
-            user = self.db.query(Borrower).filter(Borrower.borrower_id == self.borrower_id).first()
+            user = (
+                self.db.query(Borrower)
+                .filter(Borrower.borrower_id == self.borrower_id)
+                .first()
+            )
             return user
         except Exception as e:
             raise e
@@ -158,7 +164,11 @@ class UserHelper(object):
 
     def delete_user_account(self):
         try:
-            user = self.db.query(Borrower).filter(Borrower.borrower_id == self.borrower_id).first()
+            user = (
+                self.db.query(Borrower)
+                .filter(Borrower.borrower_id == self.borrower_id)
+                .first()
+            )
 
             user.account_deleted = True
             user.updated_at = datetime.now(tz)

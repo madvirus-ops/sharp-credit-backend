@@ -21,7 +21,9 @@ def validate_phone_number(phone_number: str, db: Session):
         if not valid or len(phone_number) < 11:
             return r.invalid_phone
 
-        Borrower = db.query(Borrower).filter(Borrower.phone_number == phone_number).first()
+        Borrower = (
+            db.query(Borrower).filter(Borrower.phone_number == phone_number).first()
+        )
 
         if Borrower is None:
             return {

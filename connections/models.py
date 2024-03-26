@@ -237,8 +237,6 @@ class Loans(AbstractModel):
     user = relationship("Borrower", back_populates="loans", foreign_keys=[borrower_id])
 
 
-
-
 class StopLoanRequest(AbstractModel):
     __tablename__ = "stop_loan_request"
 
@@ -278,17 +276,16 @@ class Payment(AbstractModel):
         nullable=True,
     )
     loan_id = Column(String(255), default="")
-    loan_amount = Column(Numeric,default=0)
+    loan_amount = Column(Numeric, default=0)
     mandate_reference = Column(String(255), unique=True)
 
-    payment_status = Column(String,default="") #pending,fail,success
+    payment_status = Column(String, default="")  # pending,fail,success
 
     user = relationship(
         "Borrower",
         back_populates="stop_loan_request",
         foreign_keys=[borrower_id],
     )
-
 
 
 class Staff(AbstractModel):
@@ -302,9 +299,9 @@ class Staff(AbstractModel):
 
     email_verified = Column(Boolean, default=False)
     phone_number_verified = Column(Boolean, default=False)
-    password_set = Column(Boolean,default=False)
+    password_set = Column(Boolean, default=False)
 
-    designation = Column(String(255),default="")
+    designation = Column(String(255), default="")
 
     password = Column(String(255), default="")
     pin = Column(String(255), default="False")
@@ -313,5 +310,3 @@ class Staff(AbstractModel):
     profile_picture = Column(String(255), default="")
 
     is_restricted = Column(Boolean, default=False)
-
-    

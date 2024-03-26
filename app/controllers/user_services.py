@@ -31,7 +31,9 @@ def get_user_details(borrower_id: str, db: Session):
         return r.error_occured
 
 
-def change_password(borrower_id: str, old_password: str, new_password: str, db: Session):
+def change_password(
+    borrower_id: str, old_password: str, new_password: str, db: Session
+):
     try:
         user_help = UserHelper(db, borrower_id)
         reset = user_help.changePassword(old_password, new_password)

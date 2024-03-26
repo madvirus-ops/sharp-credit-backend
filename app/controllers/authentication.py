@@ -19,14 +19,14 @@ from helpers.security import (
 )
 from helpers.Borrower import UserHelper
 from helpers.validations import validate_email, validate_phone_number
-from remita.helpers import getCustomerByPhonenumber,getCustomerByAccount
+from remita.helpers import getCustomerByPhonenumber, getCustomerByAccount
 from response import responses as r
 
 
 def create_user_account(
     phone_number: str,
     account_number: str,
-    bank_code:str,
+    bank_code: str,
     password: str,
     db: Session,
 ):
@@ -78,7 +78,9 @@ def create_user_account(
             first_name, last_name, phone_number, "", password
         )
         if help["code"] == 200:
-            user = db.query(Borrower).filter(Borrower.borrower_id == borrower_id).first()
+            user = (
+                db.query(Borrower).filter(Borrower.borrower_id == borrower_id).first()
+            )
             user.bvn = bvn
             user.phone_number_verified = True
             update_request.borrower_id = borrower_id
@@ -289,7 +291,9 @@ def login_with_password(
 
 def send_pin_reset_code(email: str, db: Session):
     try:
-        user = db.query(Borrower).filter(Borrower.email == email.lower().strip()).first()
+        user = (
+            db.query(Borrower).filter(Borrower.email == email.lower().strip()).first()
+        )
         if user is None:
             return r.user_notfound
         code = random.randint(20000, 99999)
@@ -314,7 +318,9 @@ def send_pin_reset_code(email: str, db: Session):
 
 def verify_password_reset(email: str, new_password: str, code: str, db: Session):
     try:
-        user = db.query(Borrower).filter(Borrower.email == email.lower().strip()).first()
+        user = (
+            db.query(Borrower).filter(Borrower.email == email.lower().strip()).first()
+        )
 
         if user is None:
             return r.user_notfound
@@ -385,8 +391,12 @@ def verify_refresh_access_token(
                 "message": "Your account is suspended, please contact support",
             }
 
-        access_token = create_access_token({"id": user.borrower_id, "email": user.email})
-        refresh_token = create_refresh_token({"id": user.borrower_id, "email": user.email})
+        access_token = create_access_token(
+            {"id": user.borrower_id, "email": user.email}
+        )
+        refresh_token = create_refresh_token(
+            {"id": user.borrower_id, "email": user.email}
+        )
         if refresh_token["code"] == 200 and access_token["code"] == 200:
             return {
                 "message": "token refreshed successfully",

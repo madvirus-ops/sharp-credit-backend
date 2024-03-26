@@ -11,7 +11,7 @@ from pprint import pprint
 import requests
 from sqlalchemy.orm import Session
 
-from connections.models import SalaryRequests, get_env,tz
+from connections.models import SalaryRequests, get_env, tz
 from datetime import datetime
 from helpers.generators import GenerateTransactionID
 from response import responses as r
@@ -58,13 +58,11 @@ def getCustomerByPhonenumber(phone_number: str, db: Session):
             "Authorization": authorization,
         }
 
-        payload = (
-            {
-                "authorisationCode": authorisationCode,
-                "phoneNumber": phone_number,
-                "authorisationChannel": "USSD",
-            }
-        )
+        payload = {
+            "authorisationCode": authorisationCode,
+            "phoneNumber": phone_number,
+            "authorisationChannel": "USSD",
+        }
         request_time = datetime.now(tz)
         response = requests.post(url, data=json.dumps(payload), headers=headers)
         response_data = response.json()
@@ -97,7 +95,7 @@ def getCustomerByPhonenumber(phone_number: str, db: Session):
                     response_id=response_id,
                     request_payload=json.dumps(payload),
                     request_time=request_time,
-                    response_time=response_time
+                    response_time=response_time,
                 )
             )
             db.commit()
@@ -132,14 +130,12 @@ def getCustomerByAccount(bank_code: str, account_number: str, db: Session):
             "Authorization": authorization,
         }
 
-        payload = (
-            {
-                "authorisationCode": authorisationCode,
-                "accountNumber": account_number,
-                "bankCode": bank_code,
-                "authorisationChannel": "USSD",
-            }
-        )
+        payload = {
+            "authorisationCode": authorisationCode,
+            "accountNumber": account_number,
+            "bankCode": bank_code,
+            "authorisationChannel": "USSD",
+        }
         response = requests.post(url, data=json.dumps(payload), headers=headers)
         response_data = response.json()
         request_time = datetime.now(tz)
@@ -172,7 +168,7 @@ def getCustomerByAccount(bank_code: str, account_number: str, db: Session):
                     request_type="account_number",
                     request_payload=json.dumps(payload),
                     request_time=request_time,
-                    response_time=response_time
+                    response_time=response_time,
                 )
             )
             db.commit()
