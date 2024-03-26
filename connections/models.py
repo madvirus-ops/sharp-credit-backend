@@ -146,8 +146,8 @@ class SalaryRequests(AbstractModel):
 
     salary_count = Column(Integer, default=0)
 
-    request_time = Column(DateTime, server_default=datetime.now())
-    response_time = Column(DateTime, server_default=datetime.now())
+    request_time = Column(DateTime, default=datetime.now())
+    response_time = Column(DateTime, default=datetime.now())
 
     user = relationship(
         "Borrower", back_populates="salary_request", foreign_keys=[borrower_id]
@@ -200,8 +200,8 @@ class MandateReferenceRequests(AbstractModel):
 
     response_body = Column(Text, default="")
 
-    request_time = Column(DateTime, server_default=datetime.now())
-    response_time = Column(DateTime, server_default=datetime.now())
+    request_time = Column(DateTime, default=datetime.now())
+    response_time = Column(DateTime, default=datetime.now())
 
     user = relationship(
         "Borrower",
@@ -254,8 +254,8 @@ class StopLoanRequest(AbstractModel):
 
     response_body = Column(Text, default="")
 
-    request_time = Column(DateTime, server_default=datetime.now())
-    response_time = Column(DateTime, server_default=datetime.now())
+    request_time = Column(DateTime, default=datetime.now())
+    response_time = Column(DateTime, default=datetime.now())
 
     user = relationship(
         "Borrower",
@@ -283,7 +283,7 @@ class Payment(AbstractModel):
 
     user = relationship(
         "Borrower",
-        back_populates="stop_loan_request",
+        back_populates="payment",
         foreign_keys=[borrower_id],
     )
 
