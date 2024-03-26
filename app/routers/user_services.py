@@ -21,7 +21,7 @@ async def get_full__details(
 ):
     response.status_code = authorization["code"]
     if authorization["code"] == 200:
-        result = get_user_details(authorization["data"].user_id, db)
+        result = get_user_details(authorization["data"].borrower_id, db)
         response.status_code = result["code"]
         return result
     return authorization

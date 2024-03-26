@@ -11,13 +11,13 @@ import pytz
 from sqlalchemy import asc, desc, func, or_
 from sqlalchemy.orm import Session
 
-from connections.models import RemitaRequests, Users, VerificationCodes, tz
+from connections.models import SalaryRequests, Borrower, VerificationCodes, tz
 from helpers.security import (
     create_access_token,
     create_refresh_token,
     verify_refresh_token,
 )
-from helpers.users import UserHelper
+from helpers.Borrower import UserHelper
 from helpers.validations import validate_email, validate_phone_number
 from remita.helpers import getCustomerByPhonenumber,getCustomerByAccount
 from response import responses as r
@@ -32,23 +32,23 @@ def create_user_account(
 ):
     try:
 
-        user_id = uuid.uuid4().hex
+        borrower_id = uuid.uuid4().hex
 
         if phone_number.startswith("234"):
             phone_number = "0" + phone_number[3:]
 
-        user = db.query(Users).filter(Users.phone_number == phone_number).first()
+        user = db.query(Borrower).filter(Borrower.phone_number == phone_number).first()
 
         if user:
             return r.user_exist_phone
 
         request = (
-            db.query(RemitaRequests)
+            db.query(SalaryRequests)
             .filter(
-                RemitaRequests.user_id == user.user_id,
-                RemitaRequests.request_type == "account_number",
+                SalaryRequests.borrower_id == user.borrower_id,
+                SalaryRequests.request_type == "account_number",
             )
-            .order_by(desc(RemitaRequests.created_at))
+            .order_by(desc(SalaryRequests.created_at))
             .first()
         )
 
@@ -69,19 +69,19 @@ def create_user_account(
             response_id = request["response_id"]
 
             update_request = (
-                db.query(RemitaRequests)
-                .filter(RemitaRequests.response_id == response_id)
+                db.query(SalaryRequests)
+                .filter(SalaryRequests.response_id == response_id)
                 .first()
             )
 
-        help = UserHelper(db, user_id).createUser(
+        help = UserHelper(db, borrower_id).createUser(
             first_name, last_name, phone_number, "", password
         )
         if help["code"] == 200:
-            user = db.query(Users).filter(Users.user_id == user_id).first()
+            user = db.query(Borrower).filter(Borrower.borrower_id == borrower_id).first()
             user.bvn = bvn
             user.phone_number_verified = True
-            update_request.user_id = user_id
+            update_request.borrower_id = borrower_id
             db.commit()
 
             # resend_signup_email_verification(email, db)
@@ -91,7 +91,7 @@ def create_user_account(
                 "success": True,
                 "code": 201,
                 "message": "You have successfully created your account",
-                "data": {"user_id": help["user_id"]},
+                "data": {"borrower_id": help["borrower_id"]},
             }
         return help
 
@@ -102,12 +102,12 @@ def create_user_account(
 
 def resend_signup_email_verification(email: str, db: Session):
     try:
-        user = db.query(Users).filter(Users.email == email).first()
+        user = db.query(Borrower).filter(Borrower.email == email).first()
         if user is None:
             return r.user_notfound
         code = random.randint(20000, 99999)
         add1 = VerificationCodes(
-            user_id=user.user_id,
+            borrower_id=user.borrower_id,
             code=code,
             expires=datetime.now(tz) + timedelta(minutes=10),
         )
@@ -124,11 +124,11 @@ def resend_signup_email_verification(email: str, db: Session):
 def resend_signup_phone_vefification(phonenumber: str, db: Session):
     try:
         user = (
-            db.query(Users)
+            db.query(Borrower)
             .filter(
                 or_(
-                    Users.phone_number == phonenumber.lower().strip(),
-                    Users.email == phonenumber.lower().strip(),
+                    Borrower.phone_number == phonenumber.lower().strip(),
+                    Borrower.email == phonenumber.lower().strip(),
                 )
             )
             .first()
@@ -138,7 +138,7 @@ def resend_signup_phone_vefification(phonenumber: str, db: Session):
 
         code = random.randint(20000, 99999)
         add1 = VerificationCodes(
-            user_id=user.user_id,
+            borrower_id=user.borrower_id,
             code=code,
             expires=datetime.now() + timedelta(minutes=10),
         )
@@ -158,7 +158,7 @@ def resend_signup_phone_vefification(phonenumber: str, db: Session):
 
 def verify_signup_email(email: str, code: str, db: Session):
     try:
-        user = db.query(Users).filter(Users.email == email).first()
+        user = db.query(Borrower).filter(Borrower.email == email).first()
 
         if user is None:
             return r.user_notfound
@@ -166,7 +166,7 @@ def verify_signup_email(email: str, code: str, db: Session):
         ver_code = (
             db.query(VerificationCodes)
             .filter(
-                VerificationCodes.user_id == user.user_id,
+                VerificationCodes.borrower_id == user.borrower_id,
                 VerificationCodes.code == code,
             )
             .first()
@@ -190,7 +190,7 @@ def verify_signup_email(email: str, code: str, db: Session):
                 "code": 200,
                 "message": "Email verified successfully",
                 "data": {
-                    "user_id": user.user_id,
+                    "borrower_id": user.borrower_id,
                     "full_name": f"{user.first_name} {user.last_name}",
                 },
             }
@@ -203,7 +203,7 @@ def verify_signup_phone_number(phone_number: str, code: str, db: Session):
     try:
         phonenumber = phone_number
 
-        user = db.query(Users).filter(Users.phone_number == phonenumber).first()
+        user = db.query(Borrower).filter(Borrower.phone_number == phonenumber).first()
 
         if user is None:
             return r.user_notfound
@@ -211,7 +211,7 @@ def verify_signup_phone_number(phone_number: str, code: str, db: Session):
         ver_code = (
             db.query(VerificationCodes)
             .filter(
-                VerificationCodes.user_id == user.user_id,
+                VerificationCodes.borrower_id == user.borrower_id,
                 VerificationCodes.code == code,
             )
             .first()
@@ -266,10 +266,10 @@ def login_with_password(
         else:
             user = login["user"]
             access_token = create_access_token(
-                {"id": user.user_id, "email": user.email}
+                {"id": user.borrower_id, "email": user.email}
             )
             refresh_token = create_refresh_token(
-                {"id": user.user_id, "email": user.email}
+                {"id": user.borrower_id, "email": user.email}
             )
             if refresh_token["code"] == 200 and access_token["code"] == 200:
                 return {
@@ -289,12 +289,12 @@ def login_with_password(
 
 def send_pin_reset_code(email: str, db: Session):
     try:
-        user = db.query(Users).filter(Users.email == email.lower().strip()).first()
+        user = db.query(Borrower).filter(Borrower.email == email.lower().strip()).first()
         if user is None:
             return r.user_notfound
         code = random.randint(20000, 99999)
         add1 = VerificationCodes(
-            user_id=user.user_id,
+            borrower_id=user.borrower_id,
             code=code,
             expires=datetime.now() + timedelta(minutes=10),
         )
@@ -314,7 +314,7 @@ def send_pin_reset_code(email: str, db: Session):
 
 def verify_password_reset(email: str, new_password: str, code: str, db: Session):
     try:
-        user = db.query(Users).filter(Users.email == email.lower().strip()).first()
+        user = db.query(Borrower).filter(Borrower.email == email.lower().strip()).first()
 
         if user is None:
             return r.user_notfound
@@ -322,7 +322,7 @@ def verify_password_reset(email: str, new_password: str, code: str, db: Session)
         ver_code = (
             db.query(VerificationCodes)
             .filter(
-                VerificationCodes.user_id == user.user_id,
+                VerificationCodes.borrower_id == user.borrower_id,
                 VerificationCodes.code == code,
             )
             .first()
@@ -337,7 +337,7 @@ def verify_password_reset(email: str, new_password: str, code: str, db: Session)
             return r.code_expired
 
         else:
-            if UserHelper(db, user.user_id).setUserPassword(new_password):
+            if UserHelper(db, user.borrower_id).setUserPassword(new_password):
                 user.updated_at = datetime.now(tz)
                 db.delete(ver_code)
                 db.commit()
@@ -346,7 +346,7 @@ def verify_password_reset(email: str, new_password: str, code: str, db: Session)
                     "code": 200,
                     "message": "Password reset successfully",
                     "success": True,
-                    "data": {"user_id": user.user_id},
+                    "data": {"borrower_id": user.borrower_id},
                 }
 
             return r.password_notset
@@ -369,7 +369,7 @@ def verify_refresh_access_token(
                 "message": "Invalid authorization token or token Expired.",
             }
 
-        user = db.query(Users).filter(Users.user_id == result["id"]).first()
+        user = db.query(Borrower).filter(Borrower.borrower_id == result["id"]).first()
 
         if user.account_deleted:
             return {
@@ -385,8 +385,8 @@ def verify_refresh_access_token(
                 "message": "Your account is suspended, please contact support",
             }
 
-        access_token = create_access_token({"id": user.user_id, "email": user.email})
-        refresh_token = create_refresh_token({"id": user.user_id, "email": user.email})
+        access_token = create_access_token({"id": user.borrower_id, "email": user.email})
+        refresh_token = create_refresh_token({"id": user.borrower_id, "email": user.email})
         if refresh_token["code"] == 200 and access_token["code"] == 200:
             return {
                 "message": "token refreshed successfully",

@@ -11,7 +11,8 @@ from pprint import pprint
 import requests
 from sqlalchemy.orm import Session
 
-from connections.models import RemitaRequests, get_env
+from connections.models import SalaryRequests, get_env,tz
+from datetime import datetime
 from helpers.generators import GenerateTransactionID
 from response import responses as r
 
@@ -64,9 +65,11 @@ def getCustomerByPhonenumber(phone_number: str, db: Session):
                 "authorisationChannel": "USSD",
             }
         )
+        request_time = datetime.now(tz)
         response = requests.post(url, data=json.dumps(payload), headers=headers)
         response_data = response.json()
         if response_data["status"] == "success":
+            response_time = datetime.now(tz)
             data = response_data["data"]
 
             response_id = requestId
@@ -84,7 +87,7 @@ def getCustomerByPhonenumber(phone_number: str, db: Session):
             salary_history = data["salaryPaymentDetails"]
 
             new = db.add(
-                RemitaRequests(
+                SalaryRequests(
                     customer_id=customer_id,
                     response_body=json.dumps(data),
                     salary_history=json.dumps(salary_history),
@@ -92,7 +95,9 @@ def getCustomerByPhonenumber(phone_number: str, db: Session):
                     salary_count=salary_count,
                     request_type="phone_number",
                     response_id=response_id,
-                    request_payload=json.dumps(payload)
+                    request_payload=json.dumps(payload),
+                    request_time=request_time,
+                    response_time=response_time
                 )
             )
             db.commit()
@@ -137,10 +142,11 @@ def getCustomerByAccount(bank_code: str, account_number: str, db: Session):
         )
         response = requests.post(url, data=json.dumps(payload), headers=headers)
         response_data = response.json()
+        request_time = datetime.now(tz)
         print(response_data)
         if response_data["status"] == "success":
             data = response_data["data"]
-
+            response_time = datetime.now(tz)
             response_id = requestId
             customer_id = data["customerID"]
             bvn = data["bvn"]
@@ -156,7 +162,7 @@ def getCustomerByAccount(bank_code: str, account_number: str, db: Session):
             salary_history = data["salaryPaymentDetails"]
 
             new = db.add(
-                RemitaRequests(
+                SalaryRequests(
                     customer_id=customer_id,
                     response_body=json.dumps(data),
                     salary_history=json.dumps(salary_history),
@@ -164,7 +170,9 @@ def getCustomerByAccount(bank_code: str, account_number: str, db: Session):
                     salary_count=salary_count,
                     response_id=response_id,
                     request_type="account_number",
-                    request_payload=json.dumps(payload)
+                    request_payload=json.dumps(payload),
+                    request_time=request_time,
+                    response_time=response_time
                 )
             )
             db.commit()

@@ -35,7 +35,7 @@ class ResetPassword(USerEmail):
 
 
 class Setusername(BaseModel):
-    user_id: str
+    borrower_id: str
     username: str
 
 

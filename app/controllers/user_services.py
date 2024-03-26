@@ -8,16 +8,16 @@ import pytz
 from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
 
-from connections.models import Users, VerificationCodes, RemitaRequests
+from connections.models import Borrower, VerificationCodes, SalaryRequests
 from remita.helpers import getCustomerByAccount
-from helpers.users import UserHelper
+from helpers.Borrower import UserHelper
 from response import responses as r
 import json
 
 
-def get_user_details(user_id: str, db: Session):
+def get_user_details(borrower_id: str, db: Session):
     try:
-        help = UserHelper(db, user_id).get_user_details()
+        help = UserHelper(db, borrower_id).get_user_details()
         if help != False:
             return {
                 "success": True,
@@ -31,9 +31,9 @@ def get_user_details(user_id: str, db: Session):
         return r.error_occured
 
 
-def change_password(user_id: str, old_password: str, new_password: str, db: Session):
+def change_password(borrower_id: str, old_password: str, new_password: str, db: Session):
     try:
-        user_help = UserHelper(db, user_id)
+        user_help = UserHelper(db, borrower_id)
         reset = user_help.changePassword(old_password, new_password)
         if reset["code"] == 404:
             return r.password_not_match
@@ -46,16 +46,16 @@ def change_password(user_id: str, old_password: str, new_password: str, db: Sess
 
 
 def get_customer_loan_from_account(
-    user_id: str, bank_code: str, account_number: str, db: Session
+    borrower_id: str, bank_code: str, account_number: str, db: Session
 ):
     try:
         request = (
-            db.query(RemitaRequests)
+            db.query(SalaryRequests)
             .filter(
-                RemitaRequests.user_id == user_id,
-                RemitaRequests.request_type == "phone_number",
+                SalaryRequests.borrower_id == borrower_id,
+                SalaryRequests.request_type == "phone_number",
             )
-            .order_by(desc(RemitaRequests.created_at))
+            .order_by(desc(SalaryRequests.created_at))
             .first()
         )
         if request:
@@ -81,8 +81,8 @@ def get_customer_loan_from_account(
             salary_history = request["salary_history"]
 
             update_request = (
-                db.query(RemitaRequests)
-                .filter(RemitaRequests.response_id == response_id)
+                db.query(SalaryRequests)
+                .filter(SalaryRequests.response_id == response_id)
                 .first()
             )
 

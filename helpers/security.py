@@ -12,7 +12,7 @@ from itsdangerous import BadSignature, BadTimeSignature, URLSafeTimedSerializer
 from sqlalchemy.orm import Session
 
 from connections.database import get_db
-from connections.models import Users
+from connections.models import Borrower
 
 load_dotenv()
 from datetime import datetime, timedelta
@@ -172,7 +172,7 @@ def api_key_header(token: str = Depends(JWTHeader()), db: Session = Depends(get_
                 "message": "Invalid authorization token or token Expired.",
             }
 
-        user = db.query(Users).filter(Users.user_id == tokens["id"]).first()
+        user = db.query(Borrower).filter(Borrower.borrower_id == tokens["id"]).first()
         if user.account_deleted:
             return {
                 "code": 401,

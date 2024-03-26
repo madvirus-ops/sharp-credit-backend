@@ -5,7 +5,7 @@ import re
 
 from sqlalchemy.orm import Session
 
-from connections.models import Users
+from connections.models import Borrower
 from response import responses as r
 
 
@@ -21,16 +21,16 @@ def validate_phone_number(phone_number: str, db: Session):
         if not valid or len(phone_number) < 11:
             return r.invalid_phone
 
-        users = db.query(Users).filter(Users.phone_number == phone_number).first()
+        Borrower = db.query(Borrower).filter(Borrower.phone_number == phone_number).first()
 
-        if users is None:
+        if Borrower is None:
             return {
                 "success": True,
                 "code": 200,
                 "message": "Phone number is valid",
                 "phone_number": phone_number,
             }
-        elif users.phone_number_verified == True:
+        elif Borrower.phone_number_verified == True:
             return r.user_exist_phone
         else:
             return {
@@ -53,16 +53,16 @@ def validate_email(email, db: Session):
         if chek is None:
             return r.invalid_email
 
-        users = db.query(Users).filter(Users.email == email.lower()).first()
+        Borrower = db.query(Borrower).filter(Borrower.email == email.lower()).first()
 
-        if users is None:
+        if Borrower is None:
             return {
                 "success": True,
                 "code": 200,
                 "message": "email is valid",
                 "email": email,
             }
-        elif users.email_verified == True:
+        elif Borrower.email_verified == True:
             return r.user_exist_email
 
         else:

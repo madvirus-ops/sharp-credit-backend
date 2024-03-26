@@ -14,7 +14,7 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 import response.responses as r
-from connections.models import Users
+from connections.models import Borrower
 
 pwd_hash = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -25,9 +25,9 @@ tz = pytz.timezone("Africa/Lagos")
 class UserHelper(object):
     """Helper class for user related functions"""
 
-    def __init__(self, db: Session, user_id: str = ""):
+    def __init__(self, db: Session, borrower_id: str = ""):
         self.db = db
-        self.user_id = user_id
+        self.borrower_id = borrower_id
 
     def hash_pin(self, pin):
         return pwd_hash.hash(pin)
@@ -45,7 +45,7 @@ class UserHelper(object):
     ):
         try:
             user = (
-                self.db.query(Users).filter(Users.phone_number == phone_number).first()
+                self.db.query(Borrower).filter(Borrower.phone_number == phone_number).first()
             )
 
             if user is not None:
@@ -55,17 +55,17 @@ class UserHelper(object):
                     "message": "account already exists",
                 }
 
-            user = Users(
+            user = Borrower(
                 first_name=first_name.strip(),
                 last_name=last_name.strip(),
                 email=email.strip(),
-                user_id=self.user_id,
+                borrower_id=self.borrower_id,
                 phone_number=phone_number.strip(),
                 password=self.hash_pin(password),
             )
             self.db.add(user)
             self.db.commit()
-            return {"code": 200, "user_id": self.user_id}
+            return {"code": 200, "borrower_id": self.borrower_id}
         except Exception as e:
             print(e.args)
             print("error here \n\n")
@@ -74,11 +74,11 @@ class UserHelper(object):
     def login_user(self, phone_number: str, password: str):
         try:
             user = (
-                self.db.query(Users)
+                self.db.query(Borrower)
                 .filter(
                     or_(
-                        Users.phone_number == phone_number,
-                        Users.username == phone_number,
+                        Borrower.phone_number == phone_number,
+                        Borrower.username == phone_number,
                     )
                 )
                 .first()
@@ -105,14 +105,14 @@ class UserHelper(object):
 
     def get_user_by_id(self):
         try:
-            user = self.db.query(Users).filter(Users.user_id == self.user_id).first()
+            user = self.db.query(Borrower).filter(Borrower.borrower_id == self.borrower_id).first()
             return user
         except Exception as e:
             raise e
 
     def get_user_by_username(self, username):
         try:
-            user = self.db.query(Users).filter(Users.username == username).first()
+            user = self.db.query(Borrower).filter(Borrower.username == username).first()
             return user
         except Exception as e:
             return None
@@ -122,7 +122,7 @@ class UserHelper(object):
             user = self.get_user_by_id()
 
             data = {
-                "user_id": user.user_id,
+                "borrower_id": user.borrower_id,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "phone_number": user.phone_number,
@@ -158,7 +158,7 @@ class UserHelper(object):
 
     def delete_user_account(self):
         try:
-            user = self.db.query(Users).filter(Users.user_id == self.user_id).first()
+            user = self.db.query(Borrower).filter(Borrower.borrower_id == self.borrower_id).first()
 
             user.account_deleted = True
             user.updated_at = datetime.now(tz)
