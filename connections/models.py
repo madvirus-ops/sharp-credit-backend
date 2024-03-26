@@ -62,7 +62,7 @@ class Borrower(AbstractModel):
         "VerificationCodes",
         back_populates="user",
         cascade="all, delete-orphan",
-        primaryjoin="Borrower.borrower_id==VerificationCodes.borrower_id",
+        primaryjoin="borrower.borrower_id==VerificationCodes.borrower_id",
         foreign_keys="[VerificationCodes.borrower_id]",
     )
 
@@ -70,7 +70,7 @@ class Borrower(AbstractModel):
         "SalaryRequests",
         back_populates="user",
         cascade="all, delete-orphan",
-        primaryjoin="Borrower.borrower_id==SalaryRequests.borrower_id",
+        primaryjoin="borrower.borrower_id==SalaryRequests.borrower_id",
         foreign_keys="[SalaryRequests.borrower_id]",
     )
 
@@ -78,35 +78,35 @@ class Borrower(AbstractModel):
         "LoanRequest",
         back_populates="user",
         cascade="all, delete-orphan",
-        primaryjoin="Borrower.borrower_id==LoanRequest.borrower_id",
+        primaryjoin="borrower.borrower_id==LoanRequest.borrower_id",
         foreign_keys="[LoanRequest.borrower_id]",
     )
     loans = relationship(
         "Loans",
         back_populates="user",
         cascade="all, delete-orphan",
-        primaryjoin="Borrower.borrower_id==Loans.borrower_id",
+        primaryjoin="borrower.borrower_id==Loans.borrower_id",
         foreign_keys="[Loans.borrower_id]",
     )
     mandate_reference_request = relationship(
         "MandateReferenceRequests",
         back_populates="user",
         cascade="all, delete-orphan",
-        primaryjoin="Borrower.borrower_id==MandateReferenceRequests.borrower_id",
+        primaryjoin="borrower.borrower_id==MandateReferenceRequests.borrower_id",
         foreign_keys="[MandateReferenceRequests.borrower_id]",
     )
     stop_loan_request = relationship(
         "StopLoanRequest",
         back_populates="user",
         cascade="all, delete-orphan",
-        primaryjoin="Borrower.borrower_id==StopLoanRequest.borrower_id",
+        primaryjoin="borrower.borrower_id==StopLoanRequest.borrower_id",
         foreign_keys="[StopLoanRequest.borrower_id]",
     )
     payment = relationship(
         "Payment",
         back_populates="user",
         cascade="all, delete-orphan",
-        primaryjoin="Borrower.borrower_id==Payment.borrower_id",
+        primaryjoin="borrower.borrower_id==Payment.borrower_id",
         foreign_keys="[Payment.borrower_id]",
     )
 
@@ -116,7 +116,7 @@ class VerificationCodes(AbstractModel):
 
     borrower_id = Column(
         String(255),
-        ForeignKey("Borrower.borrower_id", ondelete="CASCADE"),
+        ForeignKey("borrower.borrower_id", ondelete="CASCADE"),
         nullable=False,
     )
     code = Column(Integer, nullable=False)
@@ -134,7 +134,7 @@ class SalaryRequests(AbstractModel):
 
     borrower_id = Column(
         String(255),
-        ForeignKey("Borrower.borrower_id", ondelete="CASCADE"),
+        ForeignKey("borrower.borrower_id", ondelete="CASCADE"),
         nullable=True,
     )
     request_payload = Column(Text, default="")
@@ -162,9 +162,9 @@ class LoanRequest(AbstractModel):
 
     borrower_id = Column(
         String(255),
-        ForeignKey("Borrower.borrower_id", ondelete="CASCADE"),
+        ForeignKey("borrower.borrower_id", ondelete="CASCADE"),
         nullable=False,
-    )
+    )  # Changed "Borrower" to "borrower"
     request_payload = Column(Text, default="")
 
     response_body = Column(Text, default="")
@@ -183,7 +183,6 @@ class LoanRequest(AbstractModel):
         "Borrower", back_populates="loan_request", foreign_keys=[borrower_id]
     )
 
-
 class MandateReferenceRequests(AbstractModel):
     __tablename__ = "mandate_reference_request"
 
@@ -192,7 +191,7 @@ class MandateReferenceRequests(AbstractModel):
 
     borrower_id = Column(
         String(255),
-        ForeignKey("Borrower.borrower_id", ondelete="CASCADE"),
+        ForeignKey("borrower.borrower_id", ondelete="CASCADE"),
         nullable=True,
     )
     mandate_reference = Column(String(255), unique=True)
@@ -215,7 +214,7 @@ class Loans(AbstractModel):
 
     borrower_id = Column(
         String(255),
-        ForeignKey("Borrower.borrower_id", ondelete="CASCADE"),
+        ForeignKey("borrower.borrower_id", ondelete="CASCADE"),
         nullable=True,
     )
 
@@ -245,7 +244,7 @@ class StopLoanRequest(AbstractModel):
 
     borrower_id = Column(
         String(255),
-        ForeignKey("Borrower.borrower_id", ondelete="CASCADE"),
+        ForeignKey("borrower.borrower_id", ondelete="CASCADE"),
         nullable=True,
     )
     mandate_reference = Column(String(255), unique=True)
@@ -272,7 +271,7 @@ class Payment(AbstractModel):
 
     borrower_id = Column(
         String(255),
-        ForeignKey("Borrower.borrower_id", ondelete="CASCADE"),
+        ForeignKey("borrower.borrower_id", ondelete="CASCADE"),
         nullable=True,
     )
     loan_id = Column(String(255), default="")
