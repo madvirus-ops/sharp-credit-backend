@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from connections.models import Borrower, VerificationCodes, SalaryRequests
 from remita.helpers import getCustomerByAccount
-from helpers.Borrower import UserHelper
+from helpers.users import UserHelper
 from response import responses as r
 import json
 

@@ -17,7 +17,7 @@ from helpers.security import (
     create_refresh_token,
     verify_refresh_token,
 )
-from helpers.Borrower import UserHelper
+from helpers.users import UserHelper
 from helpers.validations import validate_email, validate_phone_number
 from remita.helpers import getCustomerByPhonenumber, getCustomerByAccount
 from response import responses as r
