@@ -30,9 +30,10 @@ async def Sign_up(
 ):
     result = create_user_account(
         body.phone_number,
-        body.email,
+        body.account_number,
+        body.bank_code,
         body.password,
-        db,
+        db
     )
     response.status_code = result["code"]
     return result

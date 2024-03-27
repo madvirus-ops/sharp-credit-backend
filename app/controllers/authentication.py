@@ -59,7 +59,7 @@ def create_user_account(
             last_name = customer_name[-1]
             bvn = data["bvn"]
         else:
-            request = getCustomerByAccount(phone_number, db)
+            request = getCustomerByAccount(bank_code,account_number,db)
             if request["code"] != 200:
                 return r.error_occured
 

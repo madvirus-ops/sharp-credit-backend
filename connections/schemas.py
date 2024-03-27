@@ -5,7 +5,8 @@ from pydantic import BaseModel, EmailStr
 
 
 class Signup(BaseModel):
-    email: str
+    bank_code: str
+    account_number:str
     password: str
     phone_number: str
 
