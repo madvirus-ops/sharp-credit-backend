@@ -32,6 +32,8 @@ def create_user_account(
 ):
     try:
 
+        
+
         borrower_id = uuid.uuid4().hex
 
         if phone_number.startswith("234"):
@@ -42,37 +44,20 @@ def create_user_account(
         if user:
             return r.user_exist_phone
 
-        request = (
+        request = getCustomerByAccount(bank_code,account_number,db)
+        if request["code"] != 200:
+            return r.error_occured
+
+        first_name = request["first_name"]
+        last_name = request["last_name"]
+        bvn = request["bvn"]
+        response_id = request["response_id"]
+
+        update_request = (
             db.query(SalaryRequests)
-            .filter(
-                SalaryRequests.borrower_id == user.borrower_id,
-                SalaryRequests.request_type == "account_number",
-            )
-            .order_by(desc(SalaryRequests.created_at))
+            .filter(SalaryRequests.response_id == response_id)
             .first()
         )
-
-        if request:
-            data = json.loads(request.response_body)
-            customer_name = data["customerName"].split(" ")
-            first_name = customer_name[0]
-            last_name = customer_name[-1]
-            bvn = data["bvn"]
-        else:
-            request = getCustomerByAccount(bank_code,account_number,db)
-            if request["code"] != 200:
-                return r.error_occured
-
-            first_name = request["first_name"]
-            last_name = request["last_name"]
-            bvn = request["bvn"]
-            response_id = request["response_id"]
-
-            update_request = (
-                db.query(SalaryRequests)
-                .filter(SalaryRequests.response_id == response_id)
-                .first()
-            )
 
         help = UserHelper(db, borrower_id).createUser(
             first_name, last_name, phone_number, "", password

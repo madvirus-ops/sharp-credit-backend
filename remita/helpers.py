@@ -11,7 +11,7 @@ from pprint import pprint
 import requests
 from sqlalchemy.orm import Session
 
-from connections.models import SalaryRequests, get_env, tz
+from connections.models import SalaryRequests, get_env, tz,LoanRequest,StopLoanRequest,MandateReferenceRequests
 from datetime import datetime
 from helpers.generators import GenerateTransactionID
 from response import responses as r
@@ -139,14 +139,13 @@ def getCustomerByAccount(bank_code: str, account_number: str, db: Session):
         response = requests.post(url, data=json.dumps(payload), headers=headers)
         response_data = response.json()
         request_time = datetime.now(tz)
-        print(response_data)
+        # print(response_data)
         if response_data["status"] == "success":
             data = response_data["data"]
             response_time = datetime.now(tz)
             response_id = requestId
-            customer_id = data["customerID"]
+            customer_id = data["originalCustomerId"]
             bvn = data["bvn"]
-            company_name = data["companyName"]
 
             customer_name = data["customerName"].split(" ")
             first_name = customer_name[0]
@@ -278,3 +277,11 @@ REMITA_BANK_CODES = {
     "512170412": "UNAAB MICROFINANCE BANK",
     "512170422": "WEST-END MICROFINANCE BANK",
 }
+
+
+def getCustomerLoanHistory(user_id:str,db:Session):
+    try:
+        pass
+    except Exception as e:
+        print(e.args)
+        return r.error_occured
